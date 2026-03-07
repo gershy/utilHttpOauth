@@ -1,3 +1,99 @@
-import '@gershy/clearing';
+import { isCls } from '@gershy/clearing';
+import type http                           from '@gershy/util-http';
+import type { HttpArgs, HttpReq, HttpRes } from '@gershy/util-http';
+import type retry from '@gershy/util-retry';
 
-export default null;
+type OptionalProps<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type HttpOauthArgs<Req extends HttpReq, Res extends HttpRes> = {
+  
+  inject: {
+    http: typeof http,
+    retry: typeof retry
+  },
+  
+  // Full http args to make a token request
+  tokenHttpArgs: HttpArgs<Req, Res>,
+  
+  // Function to extract token and expiry ms from http response
+  tokenExtract: (res: Res) => { expiryMs: number, token: string },
+  
+  // Function to inject token into outgoing authenticated http request
+  tokenInject: <T extends HttpArgs<HttpReq, HttpRes>>(token: string, req: T) => T,
+  
+  // Function to detect if incoming authenticated response indicates authentication failure
+  isUnauthenticatedRes: (res: any) => boolean
+  
+};
+export default class HttpOauth<Req extends HttpReq, Res extends HttpRes> {
+  
+  
+  private static invalidBearerToken = { expiryMs: -Infinity, token: '' };
+  
+  private inject: {
+    http: typeof http,
+    retry: typeof retry
+  };
+  private args: HttpOauthArgs<Req, Res>;
+  private bearerToken: { expiryMs: number, token: string } | Promise<{ expiryMs: number, token: string }>;
+  
+  constructor(args: HttpOauthArgs<Req, Res>) {
+    this.inject = args.inject;
+    this.args = args;
+    this.bearerToken = HttpOauth.invalidBearerToken;
+  }
+  
+  private async getBearerToken() {
+    
+    const bt = this.bearerToken;
+    const bearerToken = isCls(bt, Promise) ? await bt : bt;
+    if (Date.now() < bearerToken.expiryMs) return bearerToken.token;
+    
+    const httpArgs = this.args.tokenHttpArgs;
+    this.bearerToken = this.inject.http(httpArgs, httpArgs).then(res => {
+      
+      const { expiryMs, token } = this.args.tokenExtract(res as any);
+      const now = Date.now();
+      const remainingMs = expiryMs - now;
+      
+      return this.bearerToken = {
+        expiryMs: now + (remainingMs * 0.95 - 1500), // Eagerly expire the token
+        token
+      };
+      
+    });
+    
+    return this.bearerToken.then(v => v.token);
+    
+  }
+  
+  public async http<Req extends HttpReq, Res extends HttpRes>(args: OptionalProps<HttpArgs<Req, Res>, '$req' | '$res' | 'netProc'>): Promise<Res> {
+    
+    return this.inject.retry({
+      attempts: 3,
+      fn: async () => {
+        
+        const token = await this.getBearerToken();
+        const httpAuthArgs = this.args.tokenInject(token, {
+          ...this.args.tokenHttpArgs[slice]([ 'netProc' ]),
+          ...args
+        } as any);
+        
+        const res = await this.inject.http(httpAuthArgs, httpAuthArgs).catch(err => {
+          if (/^http (?:reject|glitch)$/.test(err.message)) return err;
+          throw err;
+        });
+        
+        if (this.args.isUnauthenticatedRes(res)) {
+          this.bearerToken = HttpOauth.invalidBearerToken;
+          throw Error('unauthenticated')[mod]({ retry: true });
+        }
+        
+        return res;
+        
+      }
+    }).then(r => r.val as any);
+    
+  }
+  
+};

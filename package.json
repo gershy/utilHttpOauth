@@ -1,6 +1,6 @@
 {
   "name": "@gershy/util-http-oauth",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "TODO",
   "keywords": [
     "TODO"
@@ -16,11 +16,11 @@
   "homepage": "https://github.com/gershy/utilHttpOauth#readme",
   "license": "ISC",
   "peerDependencies": {
-    "@gershy/clearing": "^0.0.24"
+    "@gershy/clearing": "^0.0.28"
   },
   "devDependencies": {
-    "@gershy/util-http": "^0.0.2",
-    "@gershy/util-retry": "^0.0.2",
+    "@gershy/util-http": "^0.0.3",
+    "@gershy/util-retry": "^0.0.3",
     "@types/node": "^24.10.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

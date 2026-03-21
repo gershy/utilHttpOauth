@@ -1,4 +1,4 @@
-import { isCls } from '@gershy/clearing';
+import '@gershy/clearing';
 import type http                           from '@gershy/util-http';
 import type { HttpArgs, HttpReq, HttpRes } from '@gershy/util-http';
 import type retry from '@gershy/util-retry';
@@ -27,7 +27,6 @@ export type HttpOauthArgs<Req extends HttpReq, Res extends HttpRes> = {
 };
 export default class HttpOauth<Req extends HttpReq, Res extends HttpRes> {
   
-  
   private static invalidBearerToken = { expiryMs: -Infinity, token: '' };
   
   private inject: {
@@ -46,7 +45,7 @@ export default class HttpOauth<Req extends HttpReq, Res extends HttpRes> {
   private async getBearerToken() {
     
     const bt = this.bearerToken;
-    const bearerToken = isCls(bt, Promise) ? await bt : bt;
+    const bearerToken = cl.isCls(bt, Promise) ? await bt : bt;
     if (Date.now() < bearerToken.expiryMs) return bearerToken.token;
     
     const httpArgs = this.args.tokenHttpArgs;
@@ -75,7 +74,7 @@ export default class HttpOauth<Req extends HttpReq, Res extends HttpRes> {
         
         const token = await this.getBearerToken();
         const httpAuthArgs = this.args.tokenInject(token, {
-          ...this.args.tokenHttpArgs[slice]([ 'netProc' ]),
+          ...this.args.tokenHttpArgs[cl.slice]([ 'netProc' ]),
           ...args
         } as any);
         
@@ -86,7 +85,7 @@ export default class HttpOauth<Req extends HttpReq, Res extends HttpRes> {
         
         if (this.args.isUnauthenticatedRes(res)) {
           this.bearerToken = HttpOauth.invalidBearerToken;
-          throw Error('unauthenticated')[mod]({ retry: true });
+          throw Error('unauthenticated')[cl.mod]({ retry: true });
         }
         
         return res;

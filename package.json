@@ -1,11 +1,11 @@
 {
   "name": "@gershy/util-http-oauth",
-  "version": "0.0.6",
+  "version": "0.0.7",
+  "author": "Gershom Maes",
   "description": "TODO",
   "keywords": [
     "TODO"
   ],
-  "author": "Gershom Maes",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gershy/utilHttpOauth.git"
@@ -14,38 +14,28 @@
     "url": "https://github.com/gershy/utilHttpOauth/issues"
   },
   "homepage": "https://github.com/gershy/utilHttpOauth#readme",
-  "license": "ISC",
-  "peerDependencies": {
-    "@gershy/clearing": "^0.0.36"
-  },
-  "devDependencies": {
-    "@gershy/util-http": "^0.0.7",
-    "@gershy/util-retry": "^0.0.8",
-    "@types/node": "^24.10.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  },
   "type": "module",
   "files": [
     "cmp"
   ],
-  "sideEffects": false,
-  "types": "./cmp/mjs/main.d.ts",
+  "license": "ISC",
+  "peerDependencies": {
+    "@gershy/clearing": "^0.0.43"
+  },
+  "devDependencies": {
+    "@gershy/util-http": "^0.0.10",
+    "@gershy/util-retry": "^0.0.12",
+    "@types/node": "^24.10.1"
+  },
   "exports": {
     ".": {
-      "import": "./cmp/mjs/main.js",
+      "import": "./cmp/esm/main.js",
       "require": "./cmp/cjs/main.js"
     }
   },
   "scripts": {
     "test": "npm run ts.check && npx tsx ./src/main.test.ts",
-    "ts.check": "npx tsc --noEmit",
-    "build.cjs": "tsc -p build/tsconfig.cjs.json",
-    "build.mjs": "tsc -p build/tsconfig.mjs.json",
-    "build": "node ./build/act.js removeCmp && npm run build.cjs && npm run build.mjs && node ./build/act.js finalizeExportVariants",
-    "git.pub": "npm run test && git add --all && git commit -m \"automated\" && git push",
-    "npm.login": "npm login",
-    "npm.pub": "npm run test && npm run build && npm publish --access public"
+    "ts.check": "npx tsc --noEmit"
   },
   "dependencies": {}
 }

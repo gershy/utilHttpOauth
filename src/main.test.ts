@@ -1,4 +1,4 @@
-import { assertEqual, testRunner } from '../build/utils.test.ts';
+import { testRunner } from '../build/utils.test.ts';
 import './main.ts';
 
 // Type testing
@@ -9,6 +9,7 @@ import './main.ts';
   type Tests = {
     1: Enforce<{ x: 'y' }, { x: 'y' }>,
   };
+  return 0 as any as Tests;
   
 })();
 

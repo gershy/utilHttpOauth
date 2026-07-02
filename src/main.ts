@@ -27,14 +27,14 @@ export type HttpOauthArgs<Req extends HttpReq, Res extends HttpRes> = {
 };
 export default class HttpOauth<Req extends HttpReq, Res extends HttpRes> {
   
-  private static invalidBearerToken = { expiryMs: -Infinity, token: '' };
+  protected static invalidBearerToken = { expiryMs: -Infinity, token: '' };
   
-  private inject: {
+  protected inject: {
     http: typeof http,
     retry: typeof retry
   };
-  private args: HttpOauthArgs<Req, Res>;
-  private bearerToken: { expiryMs: number, token: string } | Promise<{ expiryMs: number, token: string }>;
+  protected args: HttpOauthArgs<Req, Res>;
+  protected bearerToken: { expiryMs: number, token: string } | Promise<{ expiryMs: number, token: string }>;
   
   constructor(args: HttpOauthArgs<Req, Res>) {
     this.inject = args.inject;
@@ -42,7 +42,7 @@ export default class HttpOauth<Req extends HttpReq, Res extends HttpRes> {
     this.bearerToken = HttpOauth.invalidBearerToken;
   }
   
-  private async getBearerToken() {
+  protected async getBearerToken() {
     
     const bt = this.bearerToken;
     const bearerToken = cl.isCls(bt, Promise) ? await bt : bt;

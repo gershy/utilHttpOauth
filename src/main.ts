@@ -13,7 +13,7 @@ export type HttpOauthArgs<Req extends HttpReq, Res extends HttpRes> = {
   },
   
   // Full http args to make a token request
-  tokenHttpArgs: HttpArgs<Req, Res>,
+  tokenHttpArgs: HttpArgs<Req, Res> & Pick<Req, 'query' | 'body'>,
   
   // Function to extract token and expiry ms from http response
   tokenExtract: (res: Res) => { expiryMs: number, token: string },
